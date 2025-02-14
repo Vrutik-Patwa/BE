@@ -16,14 +16,12 @@ st.set_page_config(
 
 
 def assign_risk_category(risk, user_risk_tolerance):
-    if user_risk_tolerance == 'risky':
-        return 'High' if risk > 0.04 else 'Low'
-    elif user_risk_tolerance == 'moderate':
-        return 'Moderate' if 0.02 < risk < 0.04 else 'Low' if risk <= 0.02 else 'High'
-    elif user_risk_tolerance == 'conservative':
-        return 'Low' if risk <= 0.02 else 'Moderate'
-    else:
+    if risk > 0.035:
+        return 'High'
+    elif risk > 0.02:
         return 'Moderate'
+    else:
+        return 'Low'
 
 
 def predict_momentum(model, scaler, ticker):
@@ -96,8 +94,15 @@ def generate_portfolio(user_risk_tolerance, tickers, model, scaler, top_n=5):
         })
 
     stock_df = pd.DataFrame(stock_data)
-    filtered_stocks = stock_df[stock_df['RiskCategory']
-                               == user_risk_tolerance.capitalize()]
+    if user_risk_tolerance == 'risky':
+       filtered_stocks = stock_df[stock_df['RiskCategory'] == 'High']
+    elif user_risk_tolerance == 'moderate':
+      filtered_stocks = stock_df[stock_df['RiskCategory'] == 'Moderate']
+    elif user_risk_tolerance == 'conservative':
+      filtered_stocks = stock_df[stock_df['RiskCategory'].isin(['Low', 'Moderate'])]
+    else:
+      filtered_stocks = stock_df
+
     filtered_stocks = filtered_stocks.sort_values(
         by='Momentum', ascending=False)
 
